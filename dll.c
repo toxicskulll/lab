@@ -1,100 +1,112 @@
-//DLL
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-struct tnode {
-    int info;
-    struct tnode *llink, *rlink;
+struct node {
+    int SSN, Sal;
+    char Name[20], Dept[20], Designation[20], Ph_No[11];
+    struct node *llink, *rlink;
 };
-typedef struct tnode *TNODE;
+typedef struct node *NODE;
 
 // Get new node
-TNODE get_node() {
-    TNODE temp = (TNODE)malloc(sizeof(struct tnode));
+NODE get_node() {
+    NODE temp = (NODE)malloc(sizeof(struct node));
     temp->llink = temp->rlink = NULL;
+    printf("\nEnter Employee Details:\n");
+    printf("SSN: "); scanf("%d", &temp->SSN);
+    printf("Name: "); scanf("%s", temp->Name);
+    printf("Dept: "); scanf("%s", temp->Dept);
+    printf("Designation: "); scanf("%s", temp->Designation);
+    printf("Salary: "); scanf("%d", &temp->Sal);
+    printf("Phone: "); scanf("%s", temp->Ph_No);
     return temp;
 }
 
-// Insert a node into the BST
-TNODE insert(TNODE root, int ele) {
-    if (!root) {
-        TNODE temp = get_node();
-        temp->info = ele;
-        return temp;
-    }
-    if (ele < root->info) root->llink = insert(root->llink, ele);
-    else if (ele > root->info) root->rlink = insert(root->rlink, ele);
-    return root;
+// Insert at front
+NODE insert_front(NODE first) {
+    NODE temp = get_node();
+    if (!first) return temp;
+    temp->rlink = first;
+    first->llink = temp;
+    return temp;
 }
 
-// Preorder traversal
-void preorder(TNODE root) {
-    if (root) {
-        printf("%d\t", root->info);
-        preorder(root->llink);
-        preorder(root->rlink);
-    }
+// Insert at rear
+NODE insert_rear(NODE first) {
+    NODE temp = get_node();
+    if (!first) return temp;
+    NODE cur = first;
+    while (cur->rlink) cur = cur->rlink;
+    cur->rlink = temp;
+    temp->llink = cur;
+    return first;
 }
 
-// Inorder traversal
-void inorder(TNODE root) {
-    if (root) {
-        inorder(root->llink);
-        printf("%d\t", root->info);
-        inorder(root->rlink);
+// Delete from front
+NODE delete_front(NODE first) {
+    if (!first) {
+        printf("\nNo nodes to delete\n");
+        return NULL;
     }
+    NODE temp = first;
+    printf("\nDeleted Employee SSN: %d\n", temp->SSN);
+    first = first->rlink;
+    if (first) first->llink = NULL;
+    free(temp);
+    return first;
 }
 
-// Postorder traversal
-void postorder(TNODE root) {
-    if (root) {
-        postorder(root->llink);
-        postorder(root->rlink);
-        printf("%d\t", root->info);
+// Delete from rear
+NODE delete_rear(NODE first) {
+    if (!first) {
+        printf("\nNo nodes to delete\n");
+        return NULL;
     }
+    if (!first->rlink) {
+        printf("\nDeleted Employee SSN: %d\n", first->SSN);
+        free(first);
+        return NULL;
+    }
+    NODE cur = first;
+    while (cur->rlink) cur = cur->rlink;
+    printf("\nDeleted Employee SSN: %d\n", cur->SSN);
+    cur->llink->rlink = NULL;
+    free(cur);
+    return first;
 }
 
-// Search for a key in the BST
-int search(TNODE root, int key) {
-    if (root) {
-        if (root->info == key) return key;
-        if (key < root->info) return search(root->llink, key);
-        return search(root->rlink, key);
+// Display the list
+void display(NODE first) {
+    if (!first) {
+        printf("\nNo nodes in the list\n");
+        return;
     }
-    return -1;
+    int count = 0;
+    printf("\nEmployee Details:\n");
+    for (NODE temp = first; temp; temp = temp->rlink) {
+        printf("SSN: %d\tName: %s\tDept: %s\tDesignation: %s\tSalary: %d\tPhone: %s\n",
+               temp->SSN, temp->Name, temp->Dept, temp->Designation, temp->Sal, temp->Ph_No);
+        count++;
+    }
+    printf("\nTotal Nodes: %d\n", count);
 }
 
 // Main function
 int main() {
-    TNODE root = NULL;
-    int choice, ele, key;
-
-    printf("\n1. Insert \n2. Search \n3. Display \n4. Exit\n");
+    NODE first = NULL;
+    int choice;
     for (;;) {
-        printf("\nEnter your choice: ");
+        printf("\n1. Insert Front  2. Insert Rear  3. Delete Front  4. Delete Rear  5. Display  6. Exit\nEnter choice: ");
         scanf("%d", &choice);
         switch (choice) {
-            case 1:
-                printf("Enter the element: ");
-                scanf("%d", &ele);
-                root = insert(root, ele);
-                break;
-            case 2:
-                printf("Enter the element to be searched: ");
-                scanf("%d", &ele);
-                key = search(root, ele);
-                printf(key == -1 ? "Key not found\n" : "Key found\n");
-                break;
-            case 3:
-                printf("Preorder: "); preorder(root);
-                printf("\nInorder: "); inorder(root);
-                printf("\nPostorder: "); postorder(root);
-                printf("\n");
-                break;
-            case 4:
-                exit(0);
-            default:
-                printf("Invalid input\n");
+            case 1: first = insert_front(first); break;
+            case 2: first = insert_rear(first); break;
+            case 3: first = delete_front(first); break;
+            case 4: first = delete_rear(first); break;
+            case 5: display(first); break;
+            case 6: exit(0);
+            default: printf("Invalid choice\n");
         }
     }
 }
