@@ -34,6 +34,9 @@ int main() {
     }
     return 0;
 }
+
+//gnuplot
+//plot './plot.txt' using 1:2 with linespoints
 -----------------------------------------------------------------------------------
 //Quick Sort
 #include <stdio.h>
