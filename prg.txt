@@ -1,0 +1,179 @@
+Program-1
+
+create table emp(
+  empno int,
+  ename varchar(50),
+  job varchar(50),
+  mgrno int,
+  sal decimal(10,2),
+  com decimal(10,2));
+  
+desc emp;
+
+start transaction;
+insert into emp(empno,ename,job,mgrno,sal,com)
+values(1,'hello','analyst',2,40000.00,null);
+select * from emp;
+
+rollback;
+select * from emp;
+
+alter table emp add constraint pkempno primary key (empno);
+alter table emp modify ename varchar(50) not null;
+
+insert into emp(empno,ename,job,mgrno,sal,com)
+values(1,null,'analyst',2,40000.00,null);
+
+-------------------------------------------------------------------------------
+Program-2
+
+create table emp(
+  empno int primary key,
+  ename varchar(50),
+  job varchar(50),
+  mgr int,
+  sal decimal(10,2));
+  
+desc emp;
+
+alter table emp add com decimal(10,2);
+
+desc emp;
+
+insert into emp(empno,ename,job,mgr,sal,com)
+values(1,'hello','analyst',2,40000.00,null);
+
+select * from emp;
+
+update emp
+set job='analyst' where empno=1;
+select * from emp;
+
+ALTER TABLE emp RENAME COLUMN mgr TO mgrno;
+DESC emp;
+
+delete from emp where empno=1;
+select * from emp;
+
+-------------------------------------------------------------------------------
+Program-3
+
+create database blah;
+use blah;
+
+create table emp(
+  eid int primary key,
+  ename varchar(50),
+  age int,
+  sal decimal(10,2));
+  
+insert into emp(eid, ename, age, sal)
+  values(1,'john',30,50000),
+        (2,'alice',20,45000);
+        
+select count(ename) from emp; --no of emp
+
+select max(age) from emp; --max age
+
+select min(age) from emp; --min age
+
+select sal from emp order by sal asc; --asc order sal
+
+select sal, count(*) as empcount
+from emp group by sal
+
+-------------------------------------------------------------------------------
+Program-4
+
+create database blah;
+use blah;
+
+create table cust(
+  id int primary key,
+  name varchar(50),
+  age int,
+  address varchar(250),
+  sal decimal(10,2));
+  
+desc cust;
+
+create table custlog(
+  cid int auto_increment primary key,
+  ctype varchar(10),
+  oldsal decimal(10,2),
+  newsal decimal(10,2),
+  cts timestamp default current_timestamp);
+  
+desc custlog;
+
+DELIMITER //
+
+CREATE TRIGGER cust_insert
+AFTER INSERT ON cust
+FOR EACH ROW
+BEGIN
+  INSERT INTO custlog (ctype, oldsal, newsal)
+  VALUES ('insert', NULL, NEW.sal);
+END//
+
+--values('update',oldsal,newsal);
+--values('delete',oldsal,null);
+
+DELIMITER ;
+
+insert into cust(id,name,age,address,sal)
+values(1,'john',40,'monopoly',50000.00);
+
+update cust set sal = 500000 where id=1;
+
+delete from cust where id=1;
+
+select * from custlog;
+
+-------------------------------------------------------------------------------
+Program-5
+
+CREATE TABLE emp (
+  eid INT PRIMARY KEY,
+  ename VARCHAR(100),
+  age INT,
+  sal DECIMAL(10,2)
+);
+
+INSERT INTO emp (eid, ename, age, sal)
+VALUES (1, 'alice', 20, 4000.00);
+
+DELIMITER //
+
+CREATE PROCEDURE extractempdata()
+BEGIN
+  DECLARE veid INT;
+  DECLARE vename VARCHAR(100);
+  DECLARE vage INT;
+  DECLARE vsal DECIMAL(10,2);
+  DECLARE done INT DEFAULT 0;
+
+  DECLARE empcursor CURSOR FOR 
+    SELECT eid, ename, age, sal FROM emp;
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND 
+    SET done = 1;
+
+  OPEN empcursor;
+
+  readloop: LOOP
+    FETCH empcursor INTO veid, vename, vage, vsal;
+
+    IF done THEN
+      LEAVE readloop;
+    END IF;
+
+    SELECT veid AS eid, vename AS ename, vage AS age, vsal AS sal;
+  END LOOP readloop;
+
+  CLOSE empcursor;
+END //
+
+DELIMITER ;
+
+CALL extractempdata();
