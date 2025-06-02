@@ -1,179 +1,219 @@
-Program-1
+Program-6 dj
 
-create table emp(
-  empno int,
-  ename varchar(50),
-  job varchar(50),
-  mgrno int,
-  sal decimal(10,2),
-  com decimal(10,2));
-  
-desc emp;
+#include <stdio.h>
+#include <limits.h>
+#define MAX 100
 
-start transaction;
-insert into emp(empno,ename,job,mgrno,sal,com)
-values(1,'hello','analyst',2,40000.00,null);
-select * from emp;
+int minDistance(int dist[], int visited[], int n) {
+    int min = INT_MAX, idx = -1;
+    for (int i = 0; i < n; i++)
+        if (!visited[i] && dist[i] <= min)
+            min = dist[i], idx = i;
+    return idx;
+}
 
-rollback;
-select * from emp;
+void printSolution(int dist[], int n, int src) {
+    printf("\nShortest distances from vertex %d:\n", src);
+    for (int i = 0; i < n; i++)
+        printf("To %d = %d\n", i, dist[i]);
+}
 
-alter table emp add constraint pkempno primary key (empno);
-alter table emp modify ename varchar(50) not null;
+void dijkstra(int graph[MAX][MAX], int src, int n) {
+    int dist[MAX], visited[MAX] = {0};
+    for (int i = 0; i < n; i++) dist[i] = INT_MAX;
+    dist[src] = 0;
 
-insert into emp(empno,ename,job,mgrno,sal,com)
-values(1,null,'analyst',2,40000.00,null);
+    for (int count = 0; count < n - 1; count++) {
+        int u = minDistance(dist, visited, n);
+        visited[u] = 1;
+        for (int v = 0; v < n; v++)
+            if (!visited[v] && graph[u][v] && dist[u] + graph[u][v] < dist[v])
+                dist[v] = dist[u] + graph[u][v];
+    }
+    printSolution(dist, n, src);
+}
 
--------------------------------------------------------------------------------
-Program-2
-
-create table emp(
-  empno int primary key,
-  ename varchar(50),
-  job varchar(50),
-  mgr int,
-  sal decimal(10,2));
-  
-desc emp;
-
-alter table emp add com decimal(10,2);
-
-desc emp;
-
-insert into emp(empno,ename,job,mgr,sal,com)
-values(1,'hello','analyst',2,40000.00,null);
-
-select * from emp;
-
-update emp
-set job='analyst' where empno=1;
-select * from emp;
-
-ALTER TABLE emp RENAME COLUMN mgr TO mgrno;
-DESC emp;
-
-delete from emp where empno=1;
-select * from emp;
+int main() {
+    int graph[MAX][MAX], n, src;
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+    printf("Enter adjacency matrix:\n");
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            scanf("%d", &graph[i][j]);
+    printf("Enter source vertex: ");
+    scanf("%d", &src);
+    dijkstra(graph, src, n);
+    return 0;
+}
 
 -------------------------------------------------------------------------------
-Program-3
+Program-7 dfs
 
-create database blah;
-use blah;
+#include <stdio.h>
+#define MAX 100
 
-create table emp(
-  eid int primary key,
-  ename varchar(50),
-  age int,
-  sal decimal(10,2));
-  
-insert into emp(eid, ename, age, sal)
-  values(1,'john',30,50000),
-        (2,'alice',20,45000);
-        
-select count(ename) from emp; --no of emp
+int graph[MAX][MAX], visited[MAX], stack[MAX], top = -1;
 
-select max(age) from emp; --max age
+void dfs(int v, int n) {
+    visited[v] = 1;
+    for (int i = 0; i < n; i++)
+        if (graph[v][i] && !visited[i])
+            dfs(i, n);
+    stack[++top] = v;
+}
 
-select min(age) from emp; --min age
+void topologicalSort(int n) {
+    for (int i = 0; i < n; i++) visited[i] = 0;
+    for (int i = 0; i < n; i++)
+        if (!visited[i])
+            dfs(i, n);
+    printf("\nTopological Order:\n");
+    while (top != -1) printf("%d ", stack[top--]);
+    printf("\n");
+}
 
-select sal from emp order by sal asc; --asc order sal
-
-select sal, count(*) as empcount
-from emp group by sal
-
--------------------------------------------------------------------------------
-Program-4
-
-create database blah;
-use blah;
-
-create table cust(
-  id int primary key,
-  name varchar(50),
-  age int,
-  address varchar(250),
-  sal decimal(10,2));
-  
-desc cust;
-
-create table custlog(
-  cid int auto_increment primary key,
-  ctype varchar(10),
-  oldsal decimal(10,2),
-  newsal decimal(10,2),
-  cts timestamp default current_timestamp);
-  
-desc custlog;
-
-DELIMITER //
-
-CREATE TRIGGER cust_insert
-AFTER INSERT ON cust
-FOR EACH ROW
-BEGIN
-  INSERT INTO custlog (ctype, oldsal, newsal)
-  VALUES ('insert', NULL, NEW.sal);
-END//
-
---values('update',oldsal,newsal);
---values('delete',oldsal,null);
-
-DELIMITER ;
-
-insert into cust(id,name,age,address,sal)
-values(1,'john',40,'monopoly',50000.00);
-
-update cust set sal = 500000 where id=1;
-
-delete from cust where id=1;
-
-select * from custlog;
+int main() {
+    int n;
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+    printf("Enter adjacency matrix:\n");
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            scanf("%d", &graph[i][j]);
+    topologicalSort(n);
+    return 0;
+}
 
 -------------------------------------------------------------------------------
-Program-5
+Program-8 knap
 
-CREATE TABLE emp (
-  eid INT PRIMARY KEY,
-  ename VARCHAR(100),
-  age INT,
-  sal DECIMAL(10,2)
-);
+#include <stdio.h>
+int max(int a, int b) { return (a > b) ? a : b; }
 
-INSERT INTO emp (eid, ename, age, sal)
-VALUES (1, 'alice', 20, 4000.00);
+int knapsack(int W, int wt[], int val[], int n) {
+    int K[n + 1][W + 1];
+    for (int i = 0; i <= n; i++)
+        for (int w = 0; w <= W; w++)
+            K[i][w] = (i == 0 || w == 0) ? 0 :
+                      (wt[i - 1] <= w ? max(val[i - 1] + K[i - 1][w - wt[i - 1]], K[i - 1][w]) : K[i - 1][w]);
+    return K[n][W];
+}
 
-DELIMITER //
+int main() {
+    int n, W;
+    printf("Enter number of items: ");
+    scanf("%d", &n);
+    int val[n], wt[n];
+    printf("Enter item values:\n");
+    for (int i = 0; i < n; i++) scanf("%d", &val[i]);
+    printf("Enter item weights:\n");
+    for (int i = 0; i < n; i++) scanf("%d", &wt[i]);
+    printf("Enter knapsack capacity: ");
+    scanf("%d", &W);
+    printf("Maximum value = %d\n", knapsack(W, wt, val, n));
+    return 0;
+}
 
-CREATE PROCEDURE extractempdata()
-BEGIN
-  DECLARE veid INT;
-  DECLARE vename VARCHAR(100);
-  DECLARE vage INT;
-  DECLARE vsal DECIMAL(10,2);
-  DECLARE done INT DEFAULT 0;
+-------------------------------------------------------------------------------
+Program-9 sum
 
-  DECLARE empcursor CURSOR FOR 
-    SELECT eid, ename, age, sal FROM emp;
+#include <stdio.h>
+#include <stdbool.h>
 
-  DECLARE CONTINUE HANDLER FOR NOT FOUND 
-    SET done = 1;
+bool subset[101][1001]; // Assumes max n=100, sum=1000
 
-  OPEN empcursor;
+void printSubset(int set[], int n, int sum) {
+    printf("Subset found: ");
+    while (n > 0 && sum > 0) {
+        if (subset[n][sum] && !subset[n - 1][sum]) {
+            printf("%d ", set[n - 1]);
+            sum -= set[n - 1];
+        }
+        n--;
+    }
+    printf("\n");
+}
 
-  readloop: LOOP
-    FETCH empcursor INTO veid, vename, vage, vsal;
+bool isSubsetSum(int set[], int n, int sum) {
+    for (int i = 0; i <= n; i++) subset[i][0] = true;
+    for (int j = 1; j <= sum; j++) subset[0][j] = false;
 
-    IF done THEN
-      LEAVE readloop;
-    END IF;
+    for (int i = 1; i <= n; i++)
+        for (int s = 1; s <= sum; s++)
+            subset[i][s] = (set[i - 1] > s) ? subset[i - 1][s] :
+                           (subset[i - 1][s] || subset[i - 1][s - set[i - 1]]);
 
-    SELECT veid AS eid, vename AS ename, vage AS age, vsal AS sal;
-  END LOOP readloop;
+    if (subset[n][sum]) {
+        printSubset(set, n, sum);
+        return true;
+    }
+    return false;
+}
 
-  CLOSE empcursor;
-END //
+int main() {
+    int n, sum;
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+    int set[n];
+    printf("Enter elements:\n");
+    for (int i = 0; i < n; i++) scanf("%d", &set[i]);
+    printf("Enter target sum: ");
+    scanf("%d", &sum);
 
-DELIMITER ;
+    if (!isSubsetSum(set, n, sum))
+        printf("No subset with the given sum found.\n");
+    return 0;
+}
 
-CALL extractempdata();
+-------------------------------------------------------------------------------
+Program-10 queen
+
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#define MAX 20
+
+int board[MAX];
+
+bool isSafe(int row, int col) {
+    for (int i = 0; i < row; i++)
+        if (board[i] == col || abs(board[i] - col) == abs(i - row))
+            return false;
+    return true;
+}
+
+void printSolution(int n) {
+    printf("One of the solutions:\n");
+    for (int i = 0; i < n; i++, printf("\n"))
+        for (int j = 0; j < n; j++)
+            printf(board[i] == j ? "Q " : ". ");
+}
+
+bool solveNQueens(int row, int n) {
+    if (row == n) {
+        printSolution(n);
+        return true;
+    }
+    for (int col = 0; col < n; col++) {
+        if (isSafe(row, col)) {
+            board[row] = col;
+            if (solveNQueens(row + 1, n))
+                return true;
+        }
+    }
+    return false;
+}
+
+int main() {
+    int n;
+    printf("Enter number of queens (1-%d): ", MAX);
+    scanf("%d", &n);
+    if (n < 1 || n > MAX) {
+        printf("Invalid input.\n");
+        return 1;
+    }
+    if (!solveNQueens(0, n))
+        printf("No solution exists for N = %d\n", n);
+    return 0;
+}
