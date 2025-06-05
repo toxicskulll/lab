@@ -1,219 +1,99 @@
-Program-6 dj
+Water Jug
 
-#include <stdio.h>
-#include <limits.h>
-#define MAX 100
-
-int minDistance(int dist[], int visited[], int n) {
-    int min = INT_MAX, idx = -1;
-    for (int i = 0; i < n; i++)
-        if (!visited[i] && dist[i] <= min)
-            min = dist[i], idx = i;
-    return idx;
-}
-
-void printSolution(int dist[], int n, int src) {
-    printf("\nShortest distances from vertex %d:\n", src);
-    for (int i = 0; i < n; i++)
-        printf("To %d = %d\n", i, dist[i]);
-}
-
-void dijkstra(int graph[MAX][MAX], int src, int n) {
-    int dist[MAX], visited[MAX] = {0};
-    for (int i = 0; i < n; i++) dist[i] = INT_MAX;
-    dist[src] = 0;
-
-    for (int count = 0; count < n - 1; count++) {
-        int u = minDistance(dist, visited, n);
-        visited[u] = 1;
-        for (int v = 0; v < n; v++)
-            if (!visited[v] && graph[u][v] && dist[u] + graph[u][v] < dist[v])
-                dist[v] = dist[u] + graph[u][v];
-    }
-    printSolution(dist, n, src);
-}
-
-int main() {
-    int graph[MAX][MAX], n, src;
-    printf("Enter number of vertices: ");
-    scanf("%d", &n);
-    printf("Enter adjacency matrix:\n");
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
-            scanf("%d", &graph[i][j]);
-    printf("Enter source vertex: ");
-    scanf("%d", &src);
-    dijkstra(graph, src, n);
-    return 0;
-}
+def w(j1,j2,t):
+ s=[(0,0)];v=set()
+ while s:
+  a,b=s.pop()
+  print(f"{a},{b}")
+  if a==t or b==t:return 1
+  if (a,b)in v:continue
+  v.add((a,b));m=min
+  s+=[(j1,b),(a,j2),(0,b),(a,0),(a-m(a,j2-b),b+m(a,j2-b)),(a+m(b,j1-a),b-m(b,j1-a))]
+ print("No sol")
+w(4,3,2)
 
 -------------------------------------------------------------------------------
-Program-7 dfs
+Cannibals and Missionaries
 
-#include <stdio.h>
-#define MAX 100
-
-int graph[MAX][MAX], visited[MAX], stack[MAX], top = -1;
-
-void dfs(int v, int n) {
-    visited[v] = 1;
-    for (int i = 0; i < n; i++)
-        if (graph[v][i] && !visited[i])
-            dfs(i, n);
-    stack[++top] = v;
-}
-
-void topologicalSort(int n) {
-    for (int i = 0; i < n; i++) visited[i] = 0;
-    for (int i = 0; i < n; i++)
-        if (!visited[i])
-            dfs(i, n);
-    printf("\nTopological Order:\n");
-    while (top != -1) printf("%d ", stack[top--]);
-    printf("\n");
-}
-
-int main() {
-    int n;
-    printf("Enter number of vertices: ");
-    scanf("%d", &n);
-    printf("Enter adjacency matrix:\n");
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
-            scanf("%d", &graph[i][j]);
-    topologicalSort(n);
-    return 0;
-}
+from collections import deque
+v=lambda s:all(x>=0 for x in s)and(s[0] in [0,s[0]>=s[1]])and(s[3] in [0,s[3]>=s[4]])
+n=lambda s:[(s[0]-x,s[1]-y,0,s[3]+x,s[4]+y)if s[2]else(s[0]+x,s[1]+y,1,s[3]-x,s[4]-y)for x,y in[(1,0),(2,0),(0,1),(0,2),(1,1)]if v((s[0]-x,s[1]-y,0,s[3]+x,s[4]+y))if s[2]else v((s[0]+x,s[1]+y,1,s[3]-x,s[4]-y))]
+def f(a,b):
+ q=deque([(a,[a])]);V=set()
+ while q:
+  s,p=q.popleft()
+  if s==b:return p
+  if s in V:continue
+  V|={s}
+  q.extend((u,p+[u])for u in n(s))
+S,G=(3,3,1,0,0),(0,0,0,3,3)
+for i in f(S,G):print(i)
 
 -------------------------------------------------------------------------------
-Program-8 knap
+N Queen
 
-#include <stdio.h>
-int max(int a, int b) { return (a > b) ? a : b; }
-
-int knapsack(int W, int wt[], int val[], int n) {
-    int K[n + 1][W + 1];
-    for (int i = 0; i <= n; i++)
-        for (int w = 0; w <= W; w++)
-            K[i][w] = (i == 0 || w == 0) ? 0 :
-                      (wt[i - 1] <= w ? max(val[i - 1] + K[i - 1][w - wt[i - 1]], K[i - 1][w]) : K[i - 1][w]);
-    return K[n][W];
-}
-
-int main() {
-    int n, W;
-    printf("Enter number of items: ");
-    scanf("%d", &n);
-    int val[n], wt[n];
-    printf("Enter item values:\n");
-    for (int i = 0; i < n; i++) scanf("%d", &val[i]);
-    printf("Enter item weights:\n");
-    for (int i = 0; i < n; i++) scanf("%d", &wt[i]);
-    printf("Enter knapsack capacity: ");
-    scanf("%d", &W);
-    printf("Maximum value = %d\n", knapsack(W, wt, val, n));
-    return 0;
-}
+def solve(n,a=[]):
+ if len(a)==n:
+  for r in a: print(''.join('Q'if i==r else'.'for i in range(n)))
+  exit()
+ for i in range(n):
+  if all(i!=c and abs(len(a)-j)!=abs(i-c) for j,c in enumerate(a)):
+   solve(n,a+[i])
+solve(int(input("Enter N: ")))
 
 -------------------------------------------------------------------------------
-Program-9 sum
+TSP
 
-#include <stdio.h>
-#include <stdbool.h>
+from itertools import permutations
 
-bool subset[101][1001]; // Assumes max n=100, sum=1000
-
-void printSubset(int set[], int n, int sum) {
-    printf("Subset found: ");
-    while (n > 0 && sum > 0) {
-        if (subset[n][sum] && !subset[n - 1][sum]) {
-            printf("%d ", set[n - 1]);
-            sum -= set[n - 1];
-        }
-        n--;
-    }
-    printf("\n");
-}
-
-bool isSubsetSum(int set[], int n, int sum) {
-    for (int i = 0; i <= n; i++) subset[i][0] = true;
-    for (int j = 1; j <= sum; j++) subset[0][j] = false;
-
-    for (int i = 1; i <= n; i++)
-        for (int s = 1; s <= sum; s++)
-            subset[i][s] = (set[i - 1] > s) ? subset[i - 1][s] :
-                           (subset[i - 1][s] || subset[i - 1][s - set[i - 1]]);
-
-    if (subset[n][sum]) {
-        printSubset(set, n, sum);
-        return true;
-    }
-    return false;
-}
-
-int main() {
-    int n, sum;
-    printf("Enter number of elements: ");
-    scanf("%d", &n);
-    int set[n];
-    printf("Enter elements:\n");
-    for (int i = 0; i < n; i++) scanf("%d", &set[i]);
-    printf("Enter target sum: ");
-    scanf("%d", &sum);
-
-    if (!isSubsetSum(set, n, sum))
-        printf("No subset with the given sum found.\n");
-    return 0;
-}
+g = [[0,2,9,10],[1,0,6,4],[15,7,0,8],[6,3,12,0]]
+n = len(g)
+best = min(((sum(g[p[i]][p[i+1]] for i in range(n-1)) + g[p[-1]][p[0]], p) 
+           for p in permutations(range(n))), key=lambda x: x[0])
+print("Path:", list(best[1]) + [best[1][0]], "\nCost:", best[0])
 
 -------------------------------------------------------------------------------
-Program-10 queen
+Game
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#define MAX 20
+import random
+print("Guess a number between 1 and 5")
+if int(input()) == random.randint(1,5):
+    print("You won!")
+else:
+    print("Try again!")
 
-int board[MAX];
+-------------------------------------------------------------------------------
+Forward Chaining
 
-bool isSafe(int row, int col) {
-    for (int i = 0; i < row; i++)
-        if (board[i] == col || abs(board[i] - col) == abs(i - row))
-            return false;
-    return true;
-}
+facts = [['croaks','frog'],['eatsflies','frog'],['frog','green'],
+         ['chirps','canary'],['sing','canary'],['canary','yellow']]
 
-void printSolution(int n) {
-    printf("One of the solutions:\n");
-    for (int i = 0; i < n; i++, printf("\n"))
-        for (int j = 0; j < n; j++)
-            printf(board[i] == j ? "Q " : ". ");
-}
+def fwd(start, facts):
+    r, v, q = [], set(), list(start)
+    while q:
+        x = q.pop()
+        if x in v: continue
+        v.add(x)
+        for a,b in facts:
+            if a == x and [a,b] not in r:
+                r.append([a,b])
+                q.append(b)
+    return r
 
-bool solveNQueens(int row, int n) {
-    if (row == n) {
-        printSolution(n);
-        return true;
-    }
-    for (int col = 0; col < n; col++) {
-        if (isSafe(row, col)) {
-            board[row] = col;
-            if (solveNQueens(row + 1, n))
-                return true;
-        }
-    }
-    return false;
-}
+print(fwd(['croaks'], facts))
 
-int main() {
-    int n;
-    printf("Enter number of queens (1-%d): ", MAX);
-    scanf("%d", &n);
-    if (n < 1 || n > MAX) {
-        printf("Invalid input.\n");
-        return 1;
-    }
-    if (!solveNQueens(0, n))
-        printf("No solution exists for N = %d\n", n);
-    return 0;
-}
+-------------------------------------------------------------------------------
+FOPL
+
+from sympy import symbols, to_dnf, to_cnf
+from sympy.logic.boolalg import Or, And, Not
+
+A, B, C, D = symbols('A B C D')
+
+expr = Or(And(A, B), C, D)
+
+dnf_form = to_dnf(expr, simplify=True)
+cnf_form = to_cnf(expr, simplify=True)
+
+print("DNF:", dnf_form)
+print("CNF:", cnf_form)
