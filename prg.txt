@@ -1,99 +1,227 @@
-Water Jug
+1.Illustration of Where Clause, AND, OR operations in MongoDB.
+Execute the Commands of MongoDB and operations in MongoDB: 
+Insert, Query, Update, Delete and Projection. (Note: use any collection) 
 
-def w(j1,j2,t):
- s=[(0,0)];v=set()
- while s:
-  a,b=s.pop()
-  print(f"{a},{b}")
-  if a==t or b==t:return 1
-  if (a,b)in v:continue
-  v.add((a,b));m=min
-  s+=[(j1,b),(a,j2),(0,b),(a,0),(a-m(a,j2-b),b+m(a,j2-b)),(a+m(b,j1-a),b-m(b,j1-a))]
- print("No sol")
-w(4,3,2)
+use ProgrammingBooks
 
--------------------------------------------------------------------------------
-Cannibals and Missionaries
+db.createCollection("BookDetails")
 
-from collections import deque
-v=lambda s:all(x>=0 for x in s)and(s[0] in [0,s[0]>=s[1]])and(s[3] in [0,s[3]>=s[4]])
-n=lambda s:[(s[0]-x,s[1]-y,0,s[3]+x,s[4]+y)if s[2]else(s[0]+x,s[1]+y,1,s[3]-x,s[4]-y)for x,y in[(1,0),(2,0),(0,1),(0,2),(1,1)]if v((s[0]-x,s[1]-y,0,s[3]+x,s[4]+y))if s[2]else v((s[0]+x,s[1]+y,1,s[3]-x,s[4]-y))]
-def f(a,b):
- q=deque([(a,[a])]);V=set()
- while q:
-  s,p=q.popleft()
-  if s==b:return p
-  if s in V:continue
-  V|={s}
-  q.extend((u,p+[u])for u in n(s))
-S,G=(3,3,1,0,0),(0,0,0,3,3)
-for i in f(S,G):print(i)
+db.BookDetails.insertOne({
+  _id: 1,
+  title: "Clean Code",
+  author: "Robert C. Martin",
+  category: "Software Development",
+  year: 2008
+})
 
--------------------------------------------------------------------------------
-N Queen
+db.BookDetails.find()
 
-def solve(n,a=[]):
- if len(a)==n:
-  for r in a: print(''.join('Q'if i==r else'.'for i in range(n)))
-  exit()
- for i in range(n):
-  if all(i!=c and abs(len(a)-j)!=abs(i-c) for j,c in enumerate(a)):
-   solve(n,a+[i])
-solve(int(input("Enter N: ")))
+db.BookDetails.find({
+  $and: [
+    { category: "Software Development" },
+    { year: 2008 }
+  ]
+})
+==========================
+db.students.insertOne({ name: "Aadishesh", age: 20, branch: "AI" }) //insert
+db.students.find({ name: "Aadishesh" }) //query
+db.students.updateOne({ name: "Aadishesh" }, { $set: { age: 21 } }) //update
+db.students.deleteOne({ name: "Aadishesh" }) //delete
+db.students.find({}, { name: 1, branch: 1, _id: 0 }) //projection
 
 -------------------------------------------------------------------------------
-TSP
+2.Develop a MongoDB query to select certain fields and ignore some 
+fields of the documents from any collection. 
+Develop a MongoDB query to display the first 5 documents from the results 
+obtained.[use of limit and find] 
 
-from itertools import permutations
-
-g = [[0,2,9,10],[1,0,6,4],[15,7,0,8],[6,3,12,0]]
-n = len(g)
-best = min(((sum(g[p[i]][p[i+1]] for i in range(n-1)) + g[p[-1]][p[0]], p) 
-           for p in permutations(range(n))), key=lambda x: x[0])
-print("Path:", list(best[1]) + [best[1][0]], "\nCost:", best[0])
-
--------------------------------------------------------------------------------
-Game
-
-import random
-print("Guess a number between 1 and 5")
-if int(input()) == random.randint(1,5):
-    print("You won!")
-else:
-    print("Try again!")
+db.BookDetails.find({ },{category:1,title:1,price:0})
+=======
+db.BookDetails.find().limit(5)
 
 -------------------------------------------------------------------------------
-Forward Chaining
+3.Execute query selectors (comparison selectors, logical selectors ) and list 
+out the results on any collection 
 
-facts = [['croaks','frog'],['eatsflies','frog'],['frog','green'],
-         ['chirps','canary'],['sing','canary'],['canary','yellow']]
-
-def fwd(start, facts):
-    r, v, q = [], set(), list(start)
-    while q:
-        x = q.pop()
-        if x in v: continue
-        v.add(x)
-        for a,b in facts:
-            if a == x and [a,b] not in r:
-                r.append([a,b])
-                q.append(b)
-    return r
-
-print(fwd(['croaks'], facts))
+db.Employees.insertMany([ 
+                          { name: "Alice", age: 30, department: "HR", salary: 50000, 
+                                                    joinDate: new Date("2015-01-15") }, 
+db.Employees.find({ age: { $gt: 30 } }).pretty() , $it, $ite, $gte //comparision
+db.Employees.find({ $or: [ { department: "HR" }, { salary: { $lt: 60000 } } ] }) ,$and, $nor //logical
+db.employees.insertMany([ { name: "Alice", flags: 1 } , 
+db.employees.find({ flags: { $bitsAllSet: 1 } }) , $bitalllclear //bitwise
+========
+db.Places.createIndex({ location: "2dsphere" })
+db.Places.find({ 
+  location: { 
+    $near: { 
+      $geometry: { 
+        type: "Point", //polygon
+        coordinates: [-73.9851, 40.7580] 
+      }, 
+      $maxDistance: 5000 
+    } 
+  } 
+}).pretty( ) 
 
 -------------------------------------------------------------------------------
-FOPL
+4.Create and demonstrate how projection operators ($, $elematch and $slice) 
+would be used in the MongoDB. 
 
-from sympy import symbols, to_dnf, to_cnf
-from sympy.logic.boolalg import Or, And, Not
+db.Products.insertMany([ 
+  { 
+    name: "Laptop", 
+    brand: "BrandA", 
+    features: [ 
+      { name: "Processor", value: "Intel i7" }, 
+      { name: "RAM", value: "16GB" }, 
+      { name: "Storage", value: "512GB SSD" } 
+    ], 
+    reviews: [ 
+      { user: "Alice", rating: 5, comment: "Excellent!" }, 
+      { user: "Bob", rating: 4, comment: "Very good" }, 
+      { user: "Charlie", rating: 3, comment: "Average" } 
+    ] 
+  }, 
 
-A, B, C, D = symbols('A B C D')
+db.Products.find(  //$
+  { name: "Laptop", "reviews.user": "Alice" },
+  { "reviews.$": 1 }
+)
 
-expr = Or(And(A, B), C, D)
+db.Products.find( //$elematch
+  { name: "Laptop" },
+  { reviews: { $elemMatch: { rating: { $gt: 4 } } } }
+)
 
-dnf_form = to_dnf(expr, simplify=True)
-cnf_form = to_cnf(expr, simplify=True)
+db.Products.find( //$slice
+  { name: "Smartphone" },
+  { reviews: { $slice: 1 } }
+)
 
-print("DNF:", dnf_form)
-print("CNF:", cnf_form)
+-------------------------------------------------------------------------------
+5.Execute Aggregation operations ($avg, $min,$max, $push, $addToSet etc.). students 
+encourage to execute several queries to demonstrate various aggregation operators)
+
+db.Sales.insertMany([  
+{ date: new Date("2024-01-01"), product: "Laptop", price: 1200, quantity: 1, customer: "Amar" },
+
+db.Sales.aggregate([ { $group: { _id: "$product", averagePrice: { $avg: "$price" } } } ]).pretty( ) //minprice: $min, //maxprice: $max
+
+-------------------------------------------------------------------------------
+6.Execute Aggregation Pipeline and its operations (pipeline must contain $match, $group, 
+$sort, $project,$skip etc. students encourage to execute several queries to demonstrate 
+various aggregation operators)
+
+db.restaurants.insertMany([ 
+  { 
+    name: "Biryani House", 
+    cuisine: "Indian", 
+    location: "Jayanagar", 
+    reviews: [ 
+      { user: "Aarav", rating: 5, comment: "Amazing biryani!" }, 
+      { user: "Bhavana", rating: 4, comment: "Great place!" } 
+    ] 
+  },
+
+db.restaurants.aggregate([ 
+  { 
+    $match: { 
+      "location": "Jayanagar" 
+    } 
+  }, 
+  { 
+    $unwind: "$reviews"   
+  }, 
+  { 
+    $group: { 
+      _id: "$name", 
+      averageRating: { $avg: "$reviews.rating" }, 
+      totalReviews: { $sum: 1 } 
+    } 
+  }, 
+
+-------------------------------------------------------------------------------
+7.. Find all listings with listing_url, name, address, host_picture_url in the listings And 
+Reviews collection that have a host with a picture url 
+Using E-commerce collection write a query to display reviews summary.
+
+db.listingsAndReviews.insertMany([ 
+  { 
+    listing_url: "http://www.example.com/listing/123456", 
+    name: "Beautiful Apartment", 
+    address: { 
+      street: "123 Main Street", 
+      suburb: "Central", 
+      city: "Metropolis", 
+      country: "Wonderland" 
+    }, 
+    host: { 
+      name: "Alice", 
+      picture_url: "http://www.example.com/images/host/host123.jpg" 
+    } 
+  }, 
+
+db.listingsAndReviews.find( 
+  { 
+    "host.picture_url": { $exists: true, $ne: "" } 
+  }, 
+  { 
+    "host.picture_url": 1 
+  } 
+).pretty() 
+========
+db.products.aggregate([ 
+  { 
+    $unwind: "$reviews" 
+  }, 
+  { 
+    $group: { 
+      _id: "$name", 
+      totalReviews: { $sum: 1 }, 
+      averageRating: { $avg: "$reviews.rating" }, 
+      comments: { $push: "$reviews.comment" } 
+    } 
+  }, 
+
+-------------------------------------------------------------------------------
+8.Demonstrate creation of different types of indexes on collection 
+(unique, sparse, compound and multikey indexes) 
+ Demonstrate optimization of queries using indexes. 
+
+db.employees.insertMany([ 
+{ name: "Alice", email: "alice@example.com", dept: "HR", skills: ["communication", "leadership"] 
+},
+
+>db.employees.createIndex({ email: 1 }, { unique: true }) //sparse
+========
+db.products.insertMany([ 
+ { name: "Laptop", category: "Electronics", price: 1000, stock: 10 },
+
+db.products.find({ category: "Electronics", price: { $lt: 600 } }).explain("executionStats") 
+db.products.createIndex({ category: 1, price: 1 }) 
+db.products.find({ category: "Electronics", price: { $lt: 600 } }).explain("executionStats"). 
+executionStats. totalDocsExamined 
+
+-------------------------------------------------------------------------------
+9.Develop a query to demonstrate Text search using catalog data collection 
+for a given word 
+ Develop queries to illustrate excluding documents with certain words and 
+phrases 
+
+db.catalog.countDocuments( ) 
+db.catalog.createIndex({name: "text", genre: "text"}) 
+db.catalog.find({$text: {$search: "maga"}})  
+=================
+db.catalog.find({ $text: { $search: "crime romance -action" }, year:2021 } ) 
+
+-------------------------------------------------------------------------------
+10.Develop an aggregation pipeline to illustrate Text search on Catalog data 
+collection. 
+
+db.Catalog.createIndex({ title: "text", description: "text" })
+db.Catalog.aggregate([
+  { $match: { $text: { $search: "laptop" } } },
+  { $project: { title: 1, score: { $meta: "textScore" } } },
+  { $sort: { score: -1 } }
+])
