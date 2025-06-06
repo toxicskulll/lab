@@ -6,13 +6,7 @@ use ProgrammingBooks
 
 db.createCollection("BookDetails")
 
-db.BookDetails.insertOne({
-  _id: 1,
-  title: "Clean Code",
-  author: "Robert C. Martin",
-  category: "Software Development",
-  year: 2008
-})
+
 
 db.BookDetails.find()
 
@@ -35,6 +29,14 @@ fields of the documents from any collection.
 Develop a MongoDB query to display the first 5 documents from the results 
 obtained.[use of limit and find] 
 
+db.BookDetails.insertOne({
+  _id: 1,
+  title: "Clean Code",
+  author: "Robert C. Martin",
+  category: "Software Development",
+  year: 2008
+})
+
 db.BookDetails.find({ },{category:1,title:1,price:0})
 =======
 db.BookDetails.find().limit(5)
@@ -46,7 +48,7 @@ out the results on any collection
 db.Employees.insertMany([ 
                           { name: "Alice", age: 30, department: "HR", salary: 50000, 
                                                     joinDate: new Date("2015-01-15") }, 
-db.Employees.find({ age: { $gt: 30 } }).pretty() , $it, $ite, $gte //comparision
+db.Employees.find({ age: { $gt: 30 } }) , $it, $ite, $gte //comparision
 db.Employees.find({ $or: [ { department: "HR" }, { salary: { $lt: 60000 } } ] }) ,$and, $nor //logical
 db.employees.insertMany([ { name: "Alice", flags: 1 } , 
 db.employees.find({ flags: { $bitsAllSet: 1 } }) , $bitalllclear //bitwise
